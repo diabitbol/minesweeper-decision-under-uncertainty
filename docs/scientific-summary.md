@@ -1,149 +1,197 @@
-# Scientific summary
+# Scientific report
 
-## Research question and scope
+## Research question
 
-The project studies decision-making under uncertainty through Minesweeper:
-how can an algorithm improve its chance of revealing all safe cells when the
-visible clues do not determine a certain move?
+How can an algorithm improve its chance of winning Minesweeper when the visible
+clues no longer yield an immediate safe move? This project studies first-click
+openings, local deductions, binary linear systems, and probability-based move
+selection. Improving the probability of winning is the main objective;
+information-gain optimization remains a possible extension.
 
-The work combines first-click experiments, local deduction rules, linear algebra,
-and probabilistic move selection. Maximizing the probability of winning is the
-main practical objective. The notes also consider the information gained from a
-move, but do not establish a completed information-gain optimization method.
+## Board model and vocabulary
 
-## Board model
+Mines are placed uniformly on a square board with a fixed total mine count.
+A safe cell displays the number of mines in its neighborhood: horizontally,
+vertically, and diagonally adjacent cells within the board.
 
-A square board contains a fixed number of uniformly placed mines. A revealed safe
-cell displays the number of mines in its neighborhood, including diagonals.
-Revealing a zero expands automatically through neighboring safe cells.
+An **opening**, in Minesweeper terminology, is the region automatically revealed
+by clicking a zero-clue cell. The reveal spreads through connected zero-clue
+cells and includes their numbered boundary. In the first-click measurements,
+opening size is zero for a mine hit, one for a safe numbered cell, and the full
+revealed cell count when an opening is triggered.
 
-- **Boundary:** revealed numbered cells with at least one adjacent hidden cell.
-- **Frontier:** hidden cells adjacent to revealed numbered cells.
-- **Outside region:** hidden, unflagged cells outside the frontier.
+- **Boundary:** revealed numbered cells with adjacent hidden, unflagged cells.
+- **Frontier:** hidden, unflagged cells adjacent to revealed numbered cells.
+- **Outside region:** hidden, unflagged cells not in the frontier.
 
 | Revealed boundary | Hidden frontier |
 | --- | --- |
-| ![Revealed boundary cells outlined in green](figures/boundary.png) | ![Hidden frontier cells outlined in orange](figures/frontier.png) |
+| ![Boundary cells in green](figures/boundary.png) | ![Frontier cells in orange](figures/frontier.png) |
 
-Original diagrams from slides 5 and 6. The green outline follows revealed
-numbered cells that constrain hidden neighbors; the orange outline follows
-adjacent hidden cells whose mine status is unknown. Both show the same board.
-
-The historical Python representation uses a blank string for a hidden cell,
-`F` for a flagged mine, and integers for revealed clues. Mines in the hidden
-ground-truth board are represented by `-1`.
+These diagrams show the same board. Green outlines the revealed clues that
+constrain hidden neighbors; orange outlines the hidden cells those clues concern.
+In the Python board, a blank string means hidden, `F` means flagged, and integers
+represent revealed clues. A separate ground-truth board represents mines by
+`-1`. The mathematical model assumes flagged cells are actual mines.
 
 ## First-click experiments
 
-For each possible starting cell, repeated randomly generated boards estimate the
-mean number of cells revealed and the probability of an opening larger than one
-cell. A click on a mine contributes zero; a safe numbered cell contributes one.
+For each starting cell, repeated random 8 × 8 boards with eight mines estimate
+the probability of triggering an opening and the mean number of revealed cells.
 
-The presentation and working notes report larger mean openings near the board's
-edges, especially its corners, for the studied configuration. This concerns
-opening size, rather than proving that a corner maximizes the eventual win rate.
-The saved game strategies themselves begin with a random hidden cell.
+![Probability of triggering an opening](figures/opening-probability.png)
 
-### Saved first-click figures
+**Opening probability** is the proportion of trials revealing more than one cell.
+Its color scale is a probability, rather than a cell count.
 
-![Mean opening size by starting position](figures/mean-opening-size.png)
+![Mean opening size](figures/mean-opening-size.png)
 
-**Mean opening size.** The color scale counts the cells revealed automatically
-after the first click, with zero assigned to a mine hit. The saved output shows
-larger mean openings near the perimeter, especially at corners.
-
-![Probability of revealing more than one cell](figures/opening-probability.png)
-
-**Opening probability.** This is a different quantity: the probability that the
-first click reveals more than one cell. Its scale is a probability, not a number
-of revealed cells. This distinction also resolves a mislabeled heading in the
-original presentation; see [figure provenance](figures/README.md).
+**Mean opening size** counts revealed cells, including zero for a mine hit.
+The experiment shows larger mean openings near the perimeter, especially at
+corners. This alone does not prove that a corner maximizes the eventual win rate.
 
 ![Reveal frequency for an upper-left first click](figures/corner-reveal-frequency.png)
 
-**Spatial extent of a corner opening.** Each cell's color shows its saved reveal
-frequency for a first click at position (0, 0). Exact trial counts and seeds for
-these saved images are not established by the surviving figure files.
+**Spatial extent of a corner opening:** each cell's color shows how often it was
+revealed after an upper-left first click. These heatmaps use zero-based row and
+column coordinates, so that corner is (0, 0).
+
+The strategy-comparison code starts with a random hidden cell rather than always
+choosing a corner. First-click opening size and whole-game success are therefore
+related but distinct experimental questions.
 
 ## Certain local deductions
 
-For a clue with value $v$, let $f$ be the number of adjacent flagged mines and $u$
-the number of adjacent unknown cells.
+For one revealed clue, define $v$ as its displayed mine count, $f$ as the number
+of adjacent flagged cells, and $u$ as the number of adjacent hidden, unflagged
+cells. The remaining adjacent mine count is $v-f$.
 
-- If $v-f=0$, every adjacent unknown cell is safe.
-- If $v-f=u$, every adjacent unknown cell is a mine.
+- If $v-f=0$, all $u$ unknown neighbors are safe.
+- If $v-f=u$, all $u$ unknown neighbors are mines.
 
-The solver repeats these rules until no status changes. This is a local
-propagation method: failure to find a move does not prove that no logically
-certain move exists under the complete set of constraints.
+For example, a clue of 1 next to one flagged mine allows all its other unknown
+neighbors to be revealed safely. A clue of 2 with exactly two unknown neighbors
+and no flags identifies both as mines.
 
-## Binary linear-system model
+The solver repeats these rules until no status changes. Failure to advance under
+these local rules does not prove that no certain move follows from all constraints.
 
-Number the frontier cells and assign a variable $x_k\in\{0,1\}$ to each, with
-one indicating a mine. Each boundary clue supplies an equation:
+## Notation for the linear model
 
-$$\sum_{k\in N(c)\cap\mathcal F}x_k=v_c-f_c.$$
+Fix a visible board state. The following symbols describe that state and are
+updated when cells are revealed or flagged.
 
-Together, the equations form $Ax=b$. Selecting independent rows and columns
-identifies pivot and free variables. The saved implementation samples binary
-values of the free variables and solves for the pivots using NumPy.
+| Symbol | Definition |
+| --- | --- |
+| $\mathcal B$ | Set of revealed boundary cells. |
+| $\mathcal F$ | Set of hidden, unflagged frontier cells. |
+| $L=\lvert\mathcal B\rvert$ | Number of boundary cells; bars denote the number of elements in a set. |
+| $K=\lvert\mathcal F\rvert$ | Number of frontier cells. |
+| $d_i$, $i=1,\ldots,L$ | Boundary cell numbered $i$. |
+| $c_k$, $k=1,\ldots,K$ | Frontier cell numbered $k$. |
+| $N(d_i)$ | Set of neighbors of $d_i$, including diagonals. |
+| $v_i$ | Clue displayed at $d_i$. |
+| $f_i$ | Number of flagged neighbors of $d_i$. |
+| $x_k\in\{0,1\}$ | Mine indicator for $c_k$: 1 for a mine, 0 for a safe cell. |
+| $x=(x_1,\ldots,x_K)^T$ | Column vector of frontier indicators; $T$ denotes transpose. |
+| $A_{ik}$ | Matrix entry equal to 1 if $c_k$ neighbors $d_i$, and 0 otherwise. |
+| $b_i=v_i-f_i$ | Number of mines still to locate around $d_i$. |
+| $b=(b_1,\ldots,b_L)^T$ | Column vector of remaining clue counts. |
 
-Over **all** compatible configurations, a variable fixed at zero or one would
-provide a certain deduction. Agreement across only a finite sample cannot
-establish that certainty.
+Each boundary cell imposes one equation:
 
-## Exact probability model discussed in the notes
+$$\sum_{\substack{1\leq k\leq K\\c_k\in N(d_i)}}x_k=v_i-f_i,
+\qquad i=1,\ldots,L.$$
 
-Frontier assignments are generally not equally likely once the total mine count
-is taken into account. Let $M$ be the number of unflagged mines remaining, $U$ the
-number of hidden cells outside the frontier, and $m(s)$ the number of mines in a
-compatible frontier assignment $s$. Under a uniform fixed-mine-count board model,
-that assignment has weight
+The sum runs over frontier cells neighboring boundary cell $d_i$. Combining all
+equations gives the binary linear system
 
-$$w(s)=\binom{U}{M-m(s)},$$
+$$Ax=b,\qquad x\in\{0,1\}^K.$$
 
-with zero weight when the remaining mine count cannot fit outside the frontier.
-Thus, for a frontier cell $k$,
+The matrix $A$ has $L$ rows and $K$ columns. A binary solution is a frontier mine
+arrangement consistent with the clues. For instance, $x_1+x_2+x_3=1$ means that
+exactly one of three frontier cells contains a mine.
+
+Selecting independent rows and columns identifies **pivot variables**, computed
+by solving an invertible subsystem, and **free variables**, whose values must be
+assigned first. The code samples binary assignments for the free variables and
+solves for the pivot values with NumPy.
+
+Agreement in every globally compatible arrangement would establish a certain
+cell status. Agreement across only a finite sample cannot establish certainty.
+
+## Probability model
+
+Frontier arrangements need not be equally likely: using more mines on the
+frontier leaves fewer mines to place elsewhere. Introduce these additional symbols.
+
+| Symbol | Definition |
+| --- | --- |
+| $M$ | Mines remaining after subtracting all flags from the board's total mine count. |
+| $U$ | Number of hidden, unflagged cells outside the frontier. |
+| $s=(s_1,\ldots,s_K)$ | Candidate binary frontier arrangement; $s_k$ is the mine indicator for $c_k$. |
+| $m(s)=\sum_{k=1}^K s_k$ | Number of frontier mines in arrangement $s$. |
+| $\mathcal S$ | Arrangements satisfying the clue equations and $0\leq M-m(s)\leq U$. |
+| $\binom{U}{r}$ | Number of ways to choose $r$ mine positions among $U$ outside cells. |
+| $w(s)$ | Number of full-board placements extending arrangement $s$. |
+| $Z$ | Total number of compatible full-board mine placements. |
+| $P(x_k=1\mid\text{visible clues})$ | Probability that $c_k$ is mined given the clues, flags, and fixed mine count. |
+
+Arrangement $s$ leaves $M-m(s)$ mines outside the frontier, so its weight is
+
+$$w(s)=\binom{U}{M-m(s)}.$$
+
+Summing over all arrangements in $\mathcal S$ gives
+
+$$Z=\sum_{s\in\mathcal S}w(s).$$
+
+For a consistent board state, $Z>0$. The mine probability for cell $c_k$ is
 
 $$P(x_k=1\mid\text{visible clues})=
-\frac{\sum_s x_k(s)w(s)}{\sum_s w(s)}.$$
+\frac{\sum_{s\in\mathcal S}s_k\,w(s)}{Z}.$$
 
-The notes illustrate this with frontier assignments containing different numbers
-of mines, which leave different numbers of possible placements in the outside
-region. This is the conceptual reason a simple average over frontier assignments
-need not give the correct posterior probability.
+The numerator counts compatible full-board placements with a mine at $c_k$;
+the denominator counts all compatible placements. This explains why an unweighted
+average of frontier arrangements need not give the correct probability.
 
-The Python implementation instead averages the binary values returned by its
-sampler. The exact weighted model above is documented research, not an implemented
-feature of the published historical solver.
+### Implemented approximation
+
+The code averages sampled indicators rather than applying these weights. Define
+$H$ as the number of accepted samples, $s^{(h)}$ as accepted sample number $h$,
+and $s_k^{(h)}$ as its indicator for cell $c_k$. For $H>0$, it computes
+
+$$\widehat p_k=\frac{1}{H}\sum_{h=1}^H s_k^{(h)}.$$
+
+Here $\widehat p_k$ is the estimated mine frequency at $c_k$; repeated samples
+are retained. It is not the exact weighted probability above. A sample frequency
+of zero or one does not prove a cell's status. If no candidate is found, the
+strategy falls back to a random hidden board cell. Numerical limitations are
+described in the [implementation notes](implementation-notes.md).
 
 ## Strategy comparison
 
-All three guessing strategies first apply the local deduction rules. If those
-rules cannot advance, the algorithm either selects a random hidden frontier cell,
-selects a random hidden cell anywhere, or uses sampled frontier mine frequencies.
-The informed strategy falls back to a random hidden board cell when its sampler
-finds no candidate.
+All three strategies exhaust local deductions before guessing. **Random frontier**
+selects a hidden frontier cell, **random board** selects a hidden, unflagged cell
+anywhere, and **informed** selects a frontier cell with a low sampled mine frequency.
 
-The final presentation reports win rates of 59%, 56%, and 47% respectively for
-informed, random-board, and random-frontier strategies on 8 × 8 boards with eight
-mines. The gap increases in its larger-board examples; the full table is in the
-README. These historical observations support the motivation for informed
-guesses, but are not a new benchmark or proof of optimality.
+![Win rates for the three strategies](figures/reported-win-rates.png)
 
-![Reported win rates for the three strategies](figures/reported-win-rates.png)
+The project experiments give win rates of 59%, 56%, and 47% for informed,
+random-board, and random-frontier strategies on 8 × 8 boards with eight mines.
+The informed strategy also performs better in the two larger configurations
+studied; the full table is in the README. These observations motivate informed
+selection but do not establish optimality.
 
-The chart redraws the final presentation's numerical table in English; it does
-not rerun the experiments. Its source values are available in
-[`reported-win-rates.csv`](../data/reported-win-rates.csv), and the rendering can
-be reproduced with `python scripts/plot_reported_results.py` from the repository
-root.
+Values are stored in [`reported-win-rates.csv`](../data/reported-win-rates.csv).
+Regenerate the chart with `python scripts/plot_reported_results.py` from the root.
 
-## Limits and possible extensions
+## Limitations and extensions
 
-The saved experiments have limited reproducibility metadata, and the approximate
-sampler can mistake a sample frequency of zero or one for certainty. Exact binary
-enumeration, global mine-count weighting, independent frontier components,
-controlled benchmark protocols, and explicit information-gain objectives would
-be natural extensions. They have intentionally not been introduced into this
-moderate refactoring of the original project.
+The available experiment records do not retain all random seeds, trial counts,
+and code revisions. New runs therefore produce their own estimates.
+
+The sampler treats frequencies of zero or one as certainty. Exact enumeration,
+global mine-count weighting, independent frontier components, controlled benchmark
+protocols, and an explicit information-gain objective are possible extensions.
+Distinguishing the theoretical probability model from its implemented approximation
+is essential to interpreting the results.

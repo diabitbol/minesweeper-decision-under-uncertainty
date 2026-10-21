@@ -1,4 +1,4 @@
-"""Historical strategy using sampled binary linear-system solutions."""
+"""Project strategy using sampled binary linear-system solutions."""
 n = 8
 mines_no = 8
 import random
@@ -405,7 +405,7 @@ def build_constraints(board):
     return res
 
 def evaluate(trials, m, k):
-    """Run repeated games with the historical strategy and counting convention."""
+    """Run repeated games with the project strategy and counting convention."""
     global n
     global mines_no
     n = m

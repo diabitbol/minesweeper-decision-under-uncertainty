@@ -164,7 +164,7 @@ def reveal_neighbors_recorded(r, col):
             mine_values[r][col] = numbers[r][col]
 
 def opening_cells(i, j):
-    """Return opening size and visited cells using the historical traversal."""
+    """Return opening size and visited cells using the project traversal."""
     global visited
     global revealed_count
     global n

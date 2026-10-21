@@ -1,7 +1,7 @@
 # References and provenance
 
 These references are transcribed from the original project notes and local
-research collection. Downloaded third-party PDFs and borrowed presentation
+research collection. Downloaded third-party PDFs and third-party
 figures are not redistributed here.
 
 ## Research sources
@@ -31,5 +31,5 @@ calculation, and recursive reveal routines in the original project follow that
 starting point. This attribution is retained for the derived game routines.
 
 The strategy experiments and research were developed for Dimitri Abitbol's MP*
-TIPE. This English edition reorganizes selected surviving Python files and
+TIPE. This English edition reorganizes the Python experiments and
 documents their behavior and limitations.

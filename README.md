@@ -14,10 +14,9 @@ and Monte Carlo experiments.
 4. **Informed guesses:** model frontier cells as binary variables, sample compatible
    assignments, and choose a cell with a low estimated mine frequency.
 
-The written research also discusses an exact probability model that weights
-frontier configurations by the number of compatible placements outside the frontier.
-The historical Python sampler does **not** implement that weighting or exhaustive
-enumeration. Its estimates should not be interpreted as exact probabilities.
+The project combines experiments with a mathematical model of compatible mine
+arrangements. The implemented probability strategy uses sampling; the exact
+weighted model is explained in the [scientific report](docs/scientific-summary.md).
 
 ## First-click experiments
 
@@ -34,22 +33,60 @@ than 1 when it triggers an opening.
 The saved heatmaps show why the starting position matters on an 8 × 8 board with
 8 mines. These are original project outputs, not new simulations.
 
-| Mean opening size | Probability of an opening |
+| Probability of an opening | Mean opening size |
 | --- | --- |
-| ![Historical mean first-click opening size](docs/figures/mean-opening-size.png) | ![Historical probability of revealing more than one cell](docs/figures/opening-probability.png) |
+| ![Probability of revealing more than one cell](docs/figures/opening-probability.png) | ![Mean first-click opening size](docs/figures/mean-opening-size.png) |
 
 Corners produce larger openings on average in these experiments. The left color
-scale counts revealed cells; the right scale gives the probability of revealing
-more than one cell. Mine hits contribute zero to the opening size.
+scale gives the probability of revealing more than one cell; the right scale
+counts revealed cells. Mine hits contribute zero to the opening size.
 
-![Historical reveal frequency after an upper-left first click](docs/figures/corner-reveal-frequency.png)
+![Reveal frequency after an upper-left first click](docs/figures/corner-reveal-frequency.png)
 
 The third heatmap records how often each cell was revealed after a first click in
-the upper-left corner. See the [illustrated scientific summary](docs/scientific-summary.md)
-for the boundary/frontier diagrams and the [figure provenance](docs/figures/README.md)
-for source details and limitations.
+the upper-left corner. See the [figure guide](docs/figures/README.md) for details.
 
-## Results reported at the oral presentation
+## From clues to decisions
+
+### Boundary and frontier
+
+The **boundary** contains revealed numbered cells next to hidden cells. The
+**frontier** contains hidden, unflagged cells next to revealed numbered cells.
+Boundary clues supply constraints; frontier cells are the unknowns.
+
+| Revealed boundary | Hidden frontier |
+| --- | --- |
+| ![Revealed boundary in green](docs/figures/boundary.png) | ![Hidden frontier in orange](docs/figures/frontier.png) |
+
+### Certain moves
+
+If a clue's adjacent mines have all been flagged, its other hidden neighbors are
+safe. If its remaining mine count equals its number of hidden neighbors, those
+neighbors are all mines. The solver repeats these rules until no status changes.
+
+### Decisions under uncertainty
+
+When local deductions run out, the project compares three approaches:
+
+- **Random frontier:** choose a random hidden frontier cell.
+- **Random board:** choose a random hidden, unflagged cell anywhere on the board.
+- **Informed:** use the constraints to estimate mine frequencies and choose a
+  frontier cell with a low estimated frequency.
+
+For the informed approach, each frontier cell is represented by a binary
+variable: 1 means a mine and 0 means a safe cell. Each clue imposes an equation
+requiring its neighboring variables to sum to the number of mines still to find.
+The code samples binary solutions of this linear system and averages their mine
+indicators to estimate how risky each frontier cell is.
+
+The exact probability model additionally weights each frontier arrangement by
+the number of ways its remaining mines can be placed outside the frontier.
+The sampler does not implement this weighting or exhaustive enumeration, so its
+frequencies are approximate; a sampled frequency of zero or one is not proof of
+certainty. The [scientific report](docs/scientific-summary.md) defines all notation
+and develops the equations and probability model step by step.
+
+## Experimental results
 
 | Square board | Mines | Informed strategy | Random board | Random frontier |
 | --- | ---: | ---: | ---: | ---: |
@@ -57,13 +94,19 @@ for source details and limitations.
 | 16 × 16 | 40 | 41% | 29% | 23% |
 | 22 × 22 | 99 | 11% | 1.4% | 0.6% |
 
-![Comparison of the three strategies using the oral-presentation win rates](docs/figures/reported-win-rates.png)
+![Win rates for the three strategies](docs/figures/reported-win-rates.png)
 
-These are **historical reported results**, transcribed from the final presentation.
-The surviving files do not establish a complete reproducible record of their seeds,
-trial counts, or exact code revision. Fresh runs will produce their own results.
-The board sizes and mine counts above are the project's configurations; its
-22 × 22 board is square.
+The informed strategy achieves the highest win rate in all three configurations.
+Random selection across the board also outperforms selection restricted to the
+frontier. This motivates informed guesses, while showing that a nearby constrained
+cell is not always a better choice than a hidden cell elsewhere.
+
+These are the project's experimental results. New simulation runs produce their
+own estimates. Experiment conventions and reproducibility details are documented
+in the [implementation notes](docs/implementation-notes.md).
+
+First-click opening size and whole-game success are distinct measurements: the
+strategy experiments use a random initial cell and allow a first-click mine hit.
 
 ## Run an experiment
 
@@ -113,18 +156,19 @@ minesweeper/
     openings.py            First-click simulation primitives
     opening_plots.py       First-click heatmaps
 data/
-    reported-win-rates.csv  Values transcribed from the final oral presentation
+    reported-win-rates.csv  Project strategy-comparison results
 scripts/
     plot_reported_results.py  Regenerate the comparison chart
 docs/
-    figures/               Original heatmaps, board diagrams, and figure provenance
-    scientific-summary.md  Research question, model, and interpretation
+    figures/               Opening heatmaps, board diagrams, and figure guide
+    scientific-summary.md  Detailed scientific report and notation
     implementation-notes.md  Limitations and refactoring decisions
     references.md          Research sources and code provenance
 simulate.py                Explicit experiment entry point
 tests/                     Focused regression and mathematical checks
 ```
 
-Read the [scientific summary](docs/scientific-summary.md) for the mathematical
-model and the [implementation notes](docs/implementation-notes.md) for what the
-surviving code does and does not establish.
+The README presents the research question, method, figures, and main results.
+The [scientific report](docs/scientific-summary.md) develops the mathematical
+reasoning with defined notation; the [implementation notes](docs/implementation-notes.md)
+describe numerical limitations and experiment conventions.

@@ -1,4 +1,4 @@
-"""Historical first-click heatmaps, with explicit plot entry points."""
+"""Project first-click heatmaps, with explicit plot entry points."""
 n = 8
 trials = 10000
 from . import openings

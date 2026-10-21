@@ -1,4 +1,4 @@
-"""Historical NumPy sampler for binary linear-system solutions."""
+"""Project NumPy sampler for binary linear-system solutions."""
 import numpy as np
 import numpy.random as rd
 import numpy.linalg as alg
@@ -45,7 +45,7 @@ def independent_subsystem(A):
 def solutions(A, B, exhaustive=False, samples=1000):
     """Sample binary assignments of free variables and solve for pivot variables.
 
-Duplicates are retained, as in the historical implementation. Exhaustive
+Duplicates are retained, as in the project implementation. Exhaustive
 enumeration is not implemented. See docs/implementation-notes.md."""
     n, p = A.shape
     C, cl, cc = independent_subsystem(A)

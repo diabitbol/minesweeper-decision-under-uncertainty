@@ -2,7 +2,7 @@
 
 ## Refactoring scope
 
-This edition preserves the historical algorithmic structure and module-level
+This edition preserves the project algorithmic structure and module-level
 board state. It translates identifiers, messages, and documentation into English,
 removes obsolete commented-out drafts, and replaces automatic import-time
 experiments with an explicit runner. It also makes console clearing work on
@@ -29,7 +29,7 @@ values within a floating-point tolerance of zero or one and retains duplicates.
 The default is 1,000 attempts; exhaustive enumeration remains unimplemented.
 
 Several limitations of the original code are deliberately documented rather
-than silently changing the historical algorithm:
+than silently changing the project algorithm:
 
 - It does not weight frontier assignments by outside mine placements or enforce
   the remaining global mine count.
@@ -40,7 +40,7 @@ than silently changing the historical algorithm:
   explicitly recheck every original equation. Inconsistent input constraints
   require particular care.
 - Pivot values are assigned to an integer NumPy array after a floating-point
-  calculation. Values slightly below one can be truncated; the historical
+  calculation. Values slightly below one can be truncated; the project
   implementation does not round first.
 - Rank-zero systems and unusual degenerate inputs are not handled as a general
   mathematical API. The module is retained for the original experiments.
@@ -62,8 +62,8 @@ original code. This is not an exhaustive logical-solvability test.
 The random strategy returns a guess count of zero for losing games. Its evaluator
 divides the accumulated winning-game counts by **all trials**. The runner labels
 this `winning_game_guess_total_per_trial`: it is neither the mean over all games
-nor the mean conditioned on victory. The oral presentation's guess statistics
-cannot be reconstructed from this field without further checks.
+nor the mean conditioned on victory. A mean guess count conditioned on victory cannot be reconstructed from this
+field alone without also retaining the win count.
 
 The first-click plotting functions retain the original configuration convention:
 their `n` argument controls the plot loops, while the actual board size and mine
@@ -82,5 +82,5 @@ python -m unittest discover -s tests -v
 The checks cover local deductions, a simple sampled system, frontier construction,
 and import behavior. During preparation, seeded original/refactored comparisons
 are also used to check preservation of the selected algorithms. Passing these
-checks does not validate the historical oral results or eliminate the documented
+checks does not validate the experiment results or eliminate the documented
 scientific limitations.

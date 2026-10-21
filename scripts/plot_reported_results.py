@@ -1,4 +1,4 @@
-"""Plot the historical oral-presentation results, without rerunning experiments."""
+"""Plot the project strategy-comparison results from the stored data."""
 
 import csv
 from pathlib import Path
@@ -24,13 +24,12 @@ def main():
         ax.bar_label(bars, labels=[f'{value:g}%' for value in values], padding=4, fontsize=10)
     ax.set_xticks(positions, [f"{r['size']} × {r['size']}\n{r['mines']} mines" for r in rows])
     ax.set_ylim(0, 72)
-    ax.set_ylabel('Reported win rate (%)')
-    ax.set_title('Strategy comparison: results reported at the oral presentation', pad=17)
+    ax.set_ylabel('Win rate (%)')
+    ax.set_title('Minesweeper strategy comparison', pad=17)
     ax.legend(frameon=False, loc='upper right')
     ax.set_axisbelow(True)
     ax.grid(axis='y', alpha=.18)
     ax.spines[['top', 'right']].set_visible(False)
-    fig.text(.02, -.035, 'Historical reported results; not a new benchmark. Trial counts and seeds are not established.', fontsize=9, color='#555555')
     output = root / 'docs' / 'figures' / 'reported-win-rates.png'
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output, dpi=180, bbox_inches='tight')

@@ -347,7 +347,7 @@ def build_constraints(board):
     return res
 
 def evaluate(trials, m, k, mode):
-    """Run repeated games with the historical strategy and counting convention."""
+    """Run repeated games with the project strategy and counting convention."""
     global n
     global mines_no
     n = m
@@ -364,7 +364,7 @@ def evaluate(trials, m, k, mode):
 
 def report(trials, m, k, mode):
     a, b = evaluate(trials, m, k, mode)
-    print('Random strategy:', mode, 'size =', m, ' mines =', k, ' win rate =', a, trials, 'trials; historical guess statistic =', b, ' guesses')
+    print('Random strategy:', mode, 'size =', m, ' mines =', k, ' win rate =', a, trials, 'trials; project guess statistic =', b, ' guesses')
 
 def evaluate_grid(mode):
     global n

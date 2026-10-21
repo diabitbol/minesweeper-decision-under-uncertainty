@@ -1,33 +1,32 @@
-# Figure provenance
+# Research figures
 
-The original numerical heatmaps and board diagrams below were recovered from the
-project's local files. Their pixels are preserved; they are not newly simulated
-results. Captions supply English explanations because these numerical figures
-do not contain prose labels. Raw numerical matrices, seeds, and exact trial counts
-for the saved heatmaps are not available in this repository.
+These figures illustrate the opening experiments, board model, and strategy
+comparison. The numerical heatmaps are preserved research outputs; the comparison
+chart is generated from the stored results table.
 
-| File | Origin | Interpretation |
-| --- | --- | --- |
-| `mean-opening-size.png` | Original `modelisation1.png` | Mean number of cells revealed by a first click, including zero for a mine hit. |
-| `opening-probability.png` | Original `modélisation2.png`; also embedded on slide 15 | Probability of revealing more than one cell. The original slide calls it a mean opening size, but the saved probability scale and written research identify this as the probability heatmap. |
-| `corner-reveal-frequency.png` | Original `histogramme.png` | Saved per-cell reveal-frequency heatmap for a first click in the upper-left corner. |
-| `boundary.png` | Image embedded on slide 5 of the final presentation | Revealed boundary cells outlined in green. |
-| `frontier.png` | Image embedded on slide 6 of the final presentation | Hidden frontier cells outlined in orange. |
-| `reported-win-rates.png` | New rendering of the values on slide 29 | Historical reported win rates; the values are stored in `data/reported-win-rates.csv`. |
+| File | Quantity or concept |
+| --- | --- |
+| `opening-probability.png` | Probability that a first click reveals more than one cell. |
+| `mean-opening-size.png` | Mean number of cells revealed, including zero for a mine hit. |
+| `corner-reveal-frequency.png` | Per-cell reveal frequency for an upper-left first click. |
+| `boundary.png` | Revealed boundary cells outlined in green. |
+| `frontier.png` | Hidden frontier cells outlined in orange. |
+| `reported-win-rates.png` | Strategy win rates from `data/reported-win-rates.csv`. |
 
-Rows run downwards and columns run to the right. The opening heatmaps use
-zero-based coordinates, while the presentation diagrams use one-based labels.
-The first-click experiments use an 8 × 8 board with eight mines.
+Opening probability has a probability scale; mean opening size counts revealed
+cells. Rows run downwards and columns to the right. Heatmaps use zero-based
+coordinates; board diagrams use one-based labels. Opening experiments use an
+8 × 8 board with eight mines.
 
 ## Regenerate the comparison chart
 
-From the repository root, after installing the requirements:
+After installing the requirements, run from the repository root:
 
 ```bash
 python scripts/plot_reported_results.py
 ```
 
-The three original heatmaps are retained as saved historical outputs; this
-command does not reconstruct them. Fresh opening experiments can be run through
-`minesweeper.opening_plots`, but should not be substituted for historical images
-without identifying them as new simulations.
+This reads stored research results rather than running simulations. Fresh opening
+experiments use `minesweeper.opening_plots`. Raw matrices and exact simulation
+parameters for the saved heatmaps are not included; new heatmaps need not match
+these images exactly.

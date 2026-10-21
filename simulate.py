@@ -1,4 +1,4 @@
-"""Run the historical experiments without starting work during imports."""
+"""Run the project experiments without starting work during imports."""
 
 import argparse
 import contextlib
