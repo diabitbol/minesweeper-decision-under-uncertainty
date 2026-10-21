@@ -21,6 +21,14 @@ Revealing a zero expands automatically through neighboring safe cells.
 - **Frontier:** hidden cells adjacent to revealed numbered cells.
 - **Outside region:** hidden, unflagged cells outside the frontier.
 
+| Revealed boundary | Hidden frontier |
+| --- | --- |
+| ![Revealed boundary cells outlined in green](figures/boundary.png) | ![Hidden frontier cells outlined in orange](figures/frontier.png) |
+
+Original diagrams from slides 5 and 6. The green outline follows revealed
+numbered cells that constrain hidden neighbors; the orange outline follows
+adjacent hidden cells whose mine status is unknown. Both show the same board.
+
 The historical Python representation uses a blank string for a hidden cell,
 `F` for a flagged mine, and integers for revealed clues. Mines in the hidden
 ground-truth board are represented by `-1`.
@@ -35,6 +43,27 @@ The presentation and working notes report larger mean openings near the board's
 edges, especially its corners, for the studied configuration. This concerns
 opening size, rather than proving that a corner maximizes the eventual win rate.
 The saved game strategies themselves begin with a random hidden cell.
+
+### Saved first-click figures
+
+![Mean opening size by starting position](figures/mean-opening-size.png)
+
+**Mean opening size.** The color scale counts the cells revealed automatically
+after the first click, with zero assigned to a mine hit. The saved output shows
+larger mean openings near the perimeter, especially at corners.
+
+![Probability of revealing more than one cell](figures/opening-probability.png)
+
+**Opening probability.** This is a different quantity: the probability that the
+first click reveals more than one cell. Its scale is a probability, not a number
+of revealed cells. This distinction also resolves a mislabeled heading in the
+original presentation; see [figure provenance](figures/README.md).
+
+![Reveal frequency for an upper-left first click](figures/corner-reveal-frequency.png)
+
+**Spatial extent of a corner opening.** Each cell's color shows its saved reveal
+frequency for a first click at position (0, 0). Exact trial counts and seeds for
+these saved images are not established by the surviving figure files.
 
 ## Certain local deductions
 
@@ -101,6 +130,14 @@ informed, random-board, and random-frontier strategies on 8 × 8 boards with eig
 mines. The gap increases in its larger-board examples; the full table is in the
 README. These historical observations support the motivation for informed
 guesses, but are not a new benchmark or proof of optimality.
+
+![Reported win rates for the three strategies](figures/reported-win-rates.png)
+
+The chart redraws the final presentation's numerical table in English; it does
+not rerun the experiments. Its source values are available in
+[`reported-win-rates.csv`](../data/reported-win-rates.csv), and the rendering can
+be reproduced with `python scripts/plot_reported_results.py` from the repository
+root.
 
 ## Limits and possible extensions
 

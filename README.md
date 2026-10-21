@@ -19,6 +19,26 @@ frontier configurations by the number of compatible placements outside the front
 The historical Python sampler does **not** implement that weighting or exhaustive
 enumeration. Its estimates should not be interpreted as exact probabilities.
 
+## First-click experiments
+
+The saved heatmaps show why the starting position matters on an 8 × 8 board with
+8 mines. These are original project outputs, not new simulations.
+
+| Mean opening size | Probability of an opening |
+| --- | --- |
+| ![Historical mean first-click opening size](docs/figures/mean-opening-size.png) | ![Historical probability of revealing more than one cell](docs/figures/opening-probability.png) |
+
+Corners produce larger openings on average in these experiments. The left color
+scale counts revealed cells; the right scale gives the probability of revealing
+more than one cell. Mine hits contribute zero to the opening size.
+
+![Historical reveal frequency after an upper-left first click](docs/figures/corner-reveal-frequency.png)
+
+The third heatmap records how often each cell was revealed after a first click in
+the upper-left corner. See the [illustrated scientific summary](docs/scientific-summary.md)
+for the boundary/frontier diagrams and the [figure provenance](docs/figures/README.md)
+for source details and limitations.
+
 ## Results reported at the oral presentation
 
 | Square board | Mines | Informed strategy | Random board | Random frontier |
@@ -26,6 +46,8 @@ enumeration. Its estimates should not be interpreted as exact probabilities.
 | 8 × 8 | 8 | 59% | 56% | 47% |
 | 16 × 16 | 40 | 41% | 29% | 23% |
 | 22 × 22 | 99 | 11% | 1.4% | 0.6% |
+
+![Comparison of the three strategies using the oral-presentation win rates](docs/figures/reported-win-rates.png)
 
 These are **historical reported results**, transcribed from the final presentation.
 The surviving files do not establish a complete reproducible record of their seeds,
@@ -80,7 +102,12 @@ minesweeper/
     informed_strategy.py   Strategy using the sampler
     openings.py            First-click simulation primitives
     opening_plots.py       First-click heatmaps
+data/
+    reported-win-rates.csv  Values transcribed from the final oral presentation
+scripts/
+    plot_reported_results.py  Regenerate the comparison chart
 docs/
+    figures/               Original heatmaps, board diagrams, and figure provenance
     scientific-summary.md  Research question, model, and interpretation
     implementation-notes.md  Limitations and refactoring decisions
     references.md          Research sources and code provenance
@@ -96,7 +123,8 @@ surviving code does and does not establish.
 
 The initial console game was based on the AskPython tutorial cited in the original
 project notes. The research also draws on the sources listed in
-[References](docs/references.md). The French working documents, original slides,
+[References](docs/references.md). Selected numerical heatmaps and board diagrams from the original work are
+included with English captions. The full French working documents, slide decks,
 downloaded articles, and intermediate drafts are not included in this edition.
 
 No license has been added to this repository. Third-party material retains its
