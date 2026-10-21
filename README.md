@@ -21,6 +21,16 @@ enumeration. Its estimates should not be interpreted as exact probabilities.
 
 ## First-click experiments
 
+In Minesweeper terminology, an **opening** is the area automatically revealed
+when a zero-clue cell (a cell with no neighboring mines) is clicked. The reveal
+spreads through connected zero-clue cells and includes the numbered cells along
+their boundary. This is a game-specific term, not simply another name for the
+first move.
+
+For the measurements below, **opening size** counts all cells revealed by the
+initial click: 0 if it hits a mine, 1 if it reveals only a numbered cell, and more
+than 1 when it triggers an opening.
+
 The saved heatmaps show why the starting position matters on an 8 × 8 board with
 8 mines. These are original project outputs, not new simulations.
 
@@ -118,14 +128,3 @@ tests/                     Focused regression and mathematical checks
 Read the [scientific summary](docs/scientific-summary.md) for the mathematical
 model and the [implementation notes](docs/implementation-notes.md) for what the
 surviving code does and does not establish.
-
-## Provenance and reuse
-
-The initial console game was based on the AskPython tutorial cited in the original
-project notes. The research also draws on the sources listed in
-[References](docs/references.md). Selected numerical heatmaps and board diagrams from the original work are
-included with English captions. The full French working documents, slide decks,
-downloaded articles, and intermediate drafts are not included in this edition.
-
-No license has been added to this repository. Third-party material retains its
-own rights and terms; public availability does not grant a general reuse license.
