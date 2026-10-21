@@ -3,13 +3,7 @@
 **How should a Minesweeper player choose a move when logical deductions run out?**
 
 This project explores that question through local deductions, binary linear systems,
-and Monte Carlo experiments. It was developed by **Dimitri Abitbol** as a TIPE
-(a supervised research project) in the MP* mathematics and physics track of the
-French preparatory classes.
-
-The repository presents a moderately refactored English edition of the original
-Python experiments, alongside an English scientific summary. It preserves the
-historical strategies rather than replacing them with a new solver.
+and Monte Carlo experiments.
 
 ## The investigation
 
